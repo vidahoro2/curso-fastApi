@@ -66,16 +66,18 @@ def message():
     return HTMLResponse('<h1>Hello</h1>')
 
 
-@app.get('/movies', tags=['movies'],response_model=List[Movie])
+@app.get('/movies', tags=['movies'],response_model=List[Movie], status_code=200)
 def get_movies()->List[Movie]:
-    return JSONResponse(content=[movies])
+    return JSONResponse(status_code=200, content=[movies])
 
 @app.get('/movies/{id}', tags=['movies'], response_model=Movie)
 def get_movie(id:int = Path(ge=1, le=2000))->Movie:
     for item in movies:
         if item["id"]  == id:
             return JSONResponse(content=item)
-    return JSONResponse(content=[])
+        else:
+            return JSONResponse(status_code=404, content=[])
+    
 
 # @app.get('/movies/',tags=['movies-category'])
 # def get_movies_by_category(category: str, year:int):
@@ -87,14 +89,16 @@ def get_movie_using_category(category:str = Query(min_length=5, max_length=15))-
     for item in movies:
         if item["category"] == category:
             movie_list.append(item)
+        else:
+            return JSONResponse(status_code=404, content={"message":"No se ha encontrado la cagegoria"})
     return movie_list
 
-@app.post('/movies', tags=['movies'], response_model=dict)
+@app.post('/movies', tags=['movies'], response_model=dict,status_code=201)
 def create_movie(movie: Movie)->dict:
     movies.append(movie)
-    return  JSONResponse(content={"message":"Se ha añadido la pelicula "})
+    return  JSONResponse(status_code=201, content={"message":"Se ha añadido la pelicula "})
 
-@app.put('/movies/{id}', tags=['movies'], response_model=dict)
+@app.put('/movies/{id}', tags=['movies'], response_model=dict, status_code=200)
 def update_movie(id:int, movie: Movie)->dict:
     for item in movies :
         if item["id"] == id:
@@ -103,7 +107,7 @@ def update_movie(id:int, movie: Movie)->dict:
             item['year']= movie.year
             item['rating']= movie.rating
             item['category']= movie.category
-            return  JSONResponse(content={"message":"Se ha modificado la pelicula "})
+            return  JSONResponse(status_code=200, content={"message":"Se ha modificado la pelicula "})
         
 
 @app.delete('/movies/{id}', tags=['movies'], response_model=dict)
